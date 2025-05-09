@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+venv/
+*.egg-info/
+dist/
+build/
+
+# Conda
+conda-meta/
+conda-bld/
+pkgs/
+envs/
+
+# IDE/Editor specific
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Dataset Creator specific
+output/          # A generált kimenetek (beleértve az adathalmazokat is)
+data/            # A bemeneti videók (ezeket a felhasználó adja meg, ne legyenek a repóban)
+temp_uploads/    # Ideiglenes feltöltések mappája
+*.log            # Log fájlok
+
+# Sensitive files
+config.yaml      # Tartalmazhat HF tokent, jobb, ha van egy config.example.yaml helyette
+
+# OS specific
+.DS_Store
+Thumbs.db

@@ -1,0 +1,18 @@
+# Core processing
+ffmpeg-python
+torch
+torchaudio
+# whisperx függőségei miatt ezt a repóból telepítjük:
+# pip install git+https://github.com/m-bain/whisperX.git@main
+demucs
+pydub
+pandas
+pyyaml
+huggingface_hub
+soundfile
+librosa
+transformers
+streamlit
+
+# Opcionális, de hasznos
+tqdm

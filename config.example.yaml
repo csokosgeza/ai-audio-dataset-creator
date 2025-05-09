@@ -1,0 +1,35 @@
+# === Bemeneti/Kimeneti Útvonalak ===
+# A feldolgozandó videó teljes elérési útja VAGY a videókat tartalmazó mappa
+input_video: "data/" # Példa: a 'data' mappa, vagy "path/to/your/video.mp4"
+
+# A kimeneti mappa alapértelmezett elérési útja (a szkriptekhez képest relatív)
+output_base_dir: "output" # Ide kerülnek majd az adathalmazok almappái
+
+# Az egyes lépések kimeneti fájljai/mappái (az output_base_dir-en belüli adathalmaz mappán belül, majd videó almappán belül)
+output_raw_audio_filename: "audio_raw.wav"
+output_clean_audio_filename: "audio_clean.wav"
+output_segments_dirname: "segments"
+output_metadata_filename: "metadata.csv" # Ez az adathalmaz gyökerébe kerül
+
+# === Feldolgozási Paraméterek ===
+target_sample_rate: 24000
+language: "hu" # ISO kód (pl. en, de, fr, es, it, ja...)
+whisper_model_size: "large-v3" # Lehet: tiny, base, small, medium, large-v1, large-v2, large-v3
+min_segment_duration_ms: 3000
+max_segment_duration_ms: 13000
+
+# === Opcionális Funkciók ===
+use_demucs: True
+use_diarization: True
+huggingface_token: "YOUR_HUGGINGFACE_TOKEN_HERE_IF_USING_DIARIZATION" # <<<--- CSERÉLD LE A VALÓDI TOKENEDRE, VAGY HAGYD ÜRESEN, HA NEM HASZNÁLSZ DIARIZÁCIÓT
+
+# === Minőségellenőrzés ===
+confidence_threshold: 0.7
+
+# === GPU Beállítás ===
+device: "auto" # 'auto', 'cuda', vagy 'cpu'
+
+# === Kimeneti Struktúra (a transcribe_segment.py kezeli) ===
+# output_dir_structure: 'speaker_separated' # Ha use_diarization=True, különben 'flat'
+# Ezt a kulcsot az app.py dinamikusan állítja be a runtime_config-ban,
+# a transcribe_segment.py pedig a config['output_dir_structure'] alapján dolgozik.
