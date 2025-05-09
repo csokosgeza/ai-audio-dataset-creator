@@ -135,7 +135,7 @@ with st.sidebar:
     st.subheader("4. Whisper Modell")
     whisper_model_size_ui = st.selectbox(
         "Whisper modell mérete:",
-        options=["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3"],
+        options=["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3-turbo"],
         index=["tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3-turbo"].index(config_defaults.get('whisper_model_size', 'large-v3-turbo')),
         key="whisper_model"
     )
