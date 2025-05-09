@@ -134,7 +134,7 @@ The output is a structured dataset ready to be used as input for scripts that pr
 
 If you find this project useful and would like to support its development, you can do so through:
 
-*   **GitHub Sponsors:** [Link a GitHub Sponsors oldaladra] (Ha már beállítottad, a GitHub automatikusan megjeleníthet egy "Sponsor" gombot a repó tetején)
+*   **GitHub Sponsors:** []
 *   **Buy Me a Coffee:** [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/csokosgeza)
 
 Your support is greatly appreciated!
