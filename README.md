@@ -129,7 +129,3 @@ The output is a structured dataset ready to be used as input for scripts that pr
 *   Add a UI section for reviewing and editing transcripts directly within the Streamlit app.
 *   More granular error handling and user feedback during long processes.
 *   Option to split overly long Whisper segments more intelligently.
-
-## License
-
-This project is open-source. Please specify a license if you intend to distribute it widely (e.g., MIT, Apache 2.0). For now, consider it for personal/research use.
