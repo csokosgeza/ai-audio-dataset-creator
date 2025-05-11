@@ -121,7 +121,7 @@ The output is a structured dataset ready to be used as input for scripts that pr
 
 *   Processing, especially with Demucs and `large-v3` Whisper model on CPU, can be very time-consuming. Using a CUDA-enabled GPU is highly recommended.
 *   The quality of the dataset heavily depends on the quality of the input audio and the accuracy of the Whisper transcription. Manual review and correction of the `metadata.csv` (especially for low-confidence segments) is advised for best results.
-*   The generated `metadata.csv` and audio segments are intended as an intermediate dataset. You will need a separate script to convert this into the final `input_ids`, `labels`, and `attention_mask` format required by your specific TTS model (e.g., using an LLaMA tokenizer).
+*   The generated `metadata.csv` and audio segments are intended as an intermediate dataset. You will need a separate script to convert this into the final format required by your specific model.
 
 ## TODO / Future Improvements
 
