@@ -35,7 +35,7 @@ The output is a structured dataset ready to be used as input for scripts that pr
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/csokosgeza/ai-audio-dataset-creator.git
-    cd YOUR_REPOSITORY_NAME
+    cd ai-audio-dataset-creator
     ```
 
 2.  **Create and activate a Conda environment (recommended):**
