@@ -67,12 +67,17 @@ The output is a structured dataset ready to be used as input for scripts that pr
     ```
     *(For GPU, ensure PyTorch with CUDA is installed first. WhisperX might have a `[gpu]` extra, but often relies on the PyTorch installation.)*
 
-5.  **Install other dependencies:**
+    **Important for Windows CUDA Users:** For WhisperX to function correctly with GPU acceleration on Windows, you might need to ensure specific cuDNN files are present in your CUDA toolkit's `bin` directory. If you encounter issues related to missing DLLs (like `cudnn_ops_infer*.dll` or similar), you can try obtaining the necessary cuDNN libraries.
+    *   One source for pre-compiled cuDNN libraries compatible with some Whisper setups is: [https://github.com/Purfview/whisper-standalone-win/releases/tag/libs](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs) (Check compatibility with your CUDA and PyTorch versions).
+    *   Alternatively, you can download the official cuDNN archive from NVIDIA: [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (You'll need to register for the NVIDIA Developer Program). Make sure to select a cuDNN version compatible with your installed CUDA Toolkit.
+    *   After downloading, copy the contents of the cuDNN package (typically `bin`, `include`, and `lib` folders) into your NVIDIA CUDA Toolkit installation directory (e.g., `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXX.X\`, replacing `vXX.X` with your CUDA version). Specifically, the DLLs from the cuDNN `bin` folder should end up in the CUDA Toolkit's `bin` folder.
+
+6.  **Install other dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-6.  **Speaker Diarization Setup (If `use_diarization: True`):**
+7.  **Speaker Diarization Setup (If `use_diarization: True`):**
     *   You will need a Hugging Face account and an Access Token (with at least 'read' permissions).
     *   Go to [Hugging Face Tokens](https://huggingface.co/settings/tokens) to create a token.
     *   **Crucially, you must accept the user agreements for the following `pyannote.audio` models on Hugging Face while logged in:**
@@ -121,6 +126,11 @@ The output is a structured dataset ready to be used as input for scripts that pr
 
 *   Processing, especially with Demucs and `large-v3` Whisper model on CPU, can be very time-consuming. Using a CUDA-enabled GPU is highly recommended.
 *   The quality of the dataset heavily depends on the quality of the input audio and the accuracy of the Whisper transcription. Manual review and correction of the `metadata.csv` (especially for low-confidence segments) is advised for best results.
+
+*   **Timestamp Adjustments for Segmentation:** It has been observed that WhisperX (especially with some languages like Hungarian) might occasionally provide timestamps that result in the very end or beginning of speech segments being slightly cut off. To mitigate this, a small buffering mechanism has been implemented in `transcribe_segment.py`:
+    *   `SEGMENT_START_BUFFER_SECONDS` (default: `0.1` seconds): Attempts to start segments slightly earlier, but not before the original Whisper segment's start or the first word's detected start.
+    *   `SEGMENT_END_BUFFER_MS` (default: `140` milliseconds): Extends the end of segments slightly, capped by the total audio duration.
+    These default values can be adjusted directly in the `transcribe_segment.py` script if needed, as their optimal values might vary depending on the language and audio characteristics.
 *   The generated `metadata.csv` and audio segments are intended as an intermediate dataset. You will need a separate script to convert this into the final format required by your specific model.
 
 ## TODO / Future Improvements
