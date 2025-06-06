@@ -48,26 +48,26 @@ def check_ffmpeg():
 
 
 # === Fő funkció ===
-def extract_audio_from_video(config):
+def process_media_file(config):
     """
-    Kinyeri az audio sávot egy videófájlból FFmpeg segítségével,
-    konvertálja WAV formátumba a megadott mintavételezési frekvenciával és mono csatornával.
+    Kinyeri az audio sávot egy videófájlból vagy konvertál egy audiofájlt
+    FFmpeg segítségével a megadott mintavételezési frekvenciával (mono, WAV).
     """
     if not check_ffmpeg():
         return None # Kilépés, ha az FFmpeg nem elérhető
 
-    input_video_path = config.get('input_video')
+    input_media_path = config.get('input_path') # Változás: input_video -> input_path
     output_base_dir = config.get('output_base_dir', 'output')
     raw_audio_filename = config.get('output_raw_audio_filename', 'audio_raw.wav')
     target_sr = config.get('target_sample_rate', 24000)
 
     # Bemeneti útvonal ellenőrzése (lehet relatív vagy abszolút)
-    if not os.path.isabs(input_video_path):
-        input_video_path = os.path.abspath(input_video_path) # Relatív utat abszolúttá alakít
+    if not os.path.isabs(input_media_path):
+        input_media_path = os.path.abspath(input_media_path) # Relatív utat abszolúttá alakít
 
-    if not input_video_path or not os.path.exists(input_video_path):
-        log.error(f"Hiba: A bemeneti videófájl nem található vagy nincs megadva: {input_video_path}")
-        print(f"\nHIBA: A bemeneti videófájl nem található: {input_video_path}")
+    if not input_media_path or not os.path.exists(input_media_path):
+        log.error(f"Hiba: A bemeneti médiafájl nem található vagy nincs megadva: {input_media_path}")
+        print(f"\nHIBA: A bemeneti médiafájl nem található: {input_media_path}")
         print("Ellenőrizd az elérési utat a config.yaml fájlban.")
         return None
 
@@ -82,7 +82,7 @@ def extract_audio_from_video(config):
         return None
 
 
-    log.info(f"Audio kinyerése a következőből: {input_video_path}")
+    log.info(f"Audio előkészítése a következőből: {input_media_path}")
     log.info(f"Cél audio fájl: {output_audio_path}")
     log.info(f"Cél mintavételezési frekvencia: {target_sr} Hz, Csatornák: 1 (mono)")
 
@@ -139,13 +139,17 @@ def extract_audio_from_video(config):
 
 # === Szkript belépési pontja ===
 if __name__ == "__main__":
-    log.info("=== Audio Kinyerő Szkript Indítása ===")
+    log.info("=== Audio Előkészítő Szkript Indítása ===") # Változás
     config = load_config()
     if config:
-        extracted_audio_path = extract_audio_from_video(config)
-        if extracted_audio_path:
-            log.info(f"=== Audio kinyerése sikeresen befejezve: {extracted_audio_path} ===")
+        # A 'config' szótárban az 'input_video' kulcsot 'input_path'-ra kell cserélni
+        if 'input_video' in config:
+            config['input_path'] = config.pop('input_video')
+            
+        prepared_audio_path = process_media_file(config) # Változás
+        if prepared_audio_path:
+            log.info(f"=== Audio előkészítés sikeresen befejezve: {prepared_audio_path} ===") # Változás
         else:
-            log.error("=== Audio kinyerési folyamat sikertelen. ===")
+            log.error("=== Audio előkészítési folyamat sikertelen. ===") # Változás
     else:
          log.error("=== Konfiguráció betöltése sikertelen, a szkript leáll. ===")
