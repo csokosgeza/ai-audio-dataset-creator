@@ -3,7 +3,7 @@
 This project provides a set of Python scripts and a Streamlit UI to automate the process of creating audio datasets from video files, suitable for training Text-to-Speech (TTS) or Retrieval-based Voice Conversion (RVC) models.
 
 The pipeline includes:
-1.  **Audio Extraction:** Extracts audio from video files.
+1.  **Audio Preparation:** Prepares audio from video or audio files (converts to a standard format).
 2.  **Vocal Isolation (Optional):** Uses Demucs to remove background noise and music, isolating vocals.
 3.  **Transcription & Alignment:** Utilizes WhisperX (with a model as whisper large-v3-turbo) for accurate transcription and word-level timestamp alignment in Hungarian (or other configured languages).
 4.  **Speaker Diarization (Optional):** Identifies and separates different speakers in the audio.
@@ -14,7 +14,7 @@ The output is a structured dataset ready to be used as input for scripts that pr
 
 ## Features
 
-*   Process single or multiple video files, or an entire folder of videos.
+*   Process single or multiple video/audio files, or an entire folder of videos.
 *   User-friendly Streamlit interface for configuration and process monitoring.
 *   Optional background noise removal using Demucs.
 *   Optional speaker diarization using `pyannote.audio` through WhisperX.
@@ -90,7 +90,7 @@ The output is a structured dataset ready to be used as input for scripts that pr
 
 1.  Rename `config.example.yaml` to `config.yaml`.
 2.  Edit `config.yaml` with your desired settings:
-    *   `input_video`: Path to your video file or a folder containing video files.
+    *   `input_path`: Path to your video/audio file or a folder containing media files.
     *   `output_base_dir`: The main directory where your datasets will be saved.
     *   `language`: Set to `"hu"` for Hungarian.
     *   `use_diarization`: Set to `True` if you want to separate speakers.
@@ -110,7 +110,7 @@ The output is a structured dataset ready to be used as input for scripts that pr
     *   **Dataset Mode:**
         *   Choose "Új adathalmaz létrehozása" (Create new dataset) and provide a name.
         *   Or, choose "Meglévő adathalmazhoz adás" (Add to existing dataset) and select a previously created dataset folder.
-    *   **Input:** Upload video file(s) or provide a path to a single video or a folder of videos.
+    *   **Input:** Upload video/audio file(s) or provide a path a single media file or a folder of files.
     *   **Configure Settings:** Adjust parameters in the sidebar as needed. You can save your current UI settings to `config.yaml` for future use.
     *   **Start Processing:** Click the "Teljes Feldolgozás Indítása" (Start Full Processing) button.
     *   Monitor the progress in the main panel.
