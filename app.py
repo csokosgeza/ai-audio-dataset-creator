@@ -14,7 +14,7 @@ import datetime  # Egyedi mappa nevekhez
 
 # Importáljuk a meglévő moduljaink fő funkcióit
 try:
-    from extract_audio import extract_audio_from_video, check_ffmpeg
+    from extract_audio import process_media_file, check_ffmpeg
     from isolate_vocals import isolate_vocals_with_demucs
     from transcribe_segment import transcribe_and_segment
 except ImportError as e:
@@ -37,7 +37,7 @@ def load_default_config():
         st.error(
             f"Alapértelmezett konfigurációs fájl ({CONFIG_PATH}) nem található! Hozz létre egyet a `config.example.yaml` alapján, vagy mentsd el a beállításokat az oldalsávon.")
         return {
-            'input_video': 'data/', 'output_base_dir': 'output',
+            'input_path': 'data/', 'output_base_dir': 'output',
             'output_raw_audio_filename': 'audio_raw.wav', 'output_clean_audio_filename': 'audio_clean.wav',
             'output_segments_dirname': 'segments', 'output_metadata_filename': 'metadata.csv',
             'target_sample_rate': 24000, 'language': 'hu', 'whisper_model_size': 'large-v3-turbo',
@@ -138,12 +138,12 @@ with st.sidebar:
     # ... (többi UI elem változatlan) ...
     st.subheader("1. Bemenet")
     uploaded_files = st.file_uploader(
-        "Videófájl(ok) feltöltése:", type=['mp4', 'mkv', 'mov', 'avi', 'webm'],
+        "Videó/hangfájl(ok) feltöltése:", type=['mp4', 'mkv', 'mov', 'avi', 'webm', 'mp3', 'wav', 'flac', 'm4a'], # Változás: audio formátumok hozzáadva
         accept_multiple_files=True, key="file_uploader_widget"
     )
-    input_video_path_ui = st.text_input(
-        "Vagy add meg a videófájl/mappa elérési útját:",
-        value=config_defaults.get('input_video', 'data/'), key="path_input_widget"
+    input_path_ui = st.text_input( # Változás: input_video_path_ui -> input_path_ui
+        "Vagy add meg a médiafájl/mappa elérési útját:", # Változás: videófájl -> médiafájl
+        value=config_defaults.get('input_path', 'data/'), key="path_input_widget" # Változás: input_video -> input_path
     )
 
     st.subheader("3. Audio Paraméterek")
@@ -259,102 +259,102 @@ if st.button("🚀 Teljes Feldolgozás Indítása", type="primary", use_containe
         'output_dir_structure': 'speaker_separated' if use_diarization_ui else 'flat'
     }
 
-    videos_to_process = []
+    media_to_process = [] # Változás: videos_to_process -> media_to_process
     temp_uploaded_paths = []
 
     if uploaded_files:
         for uploaded_file in uploaded_files:
-            temp_video_path = os.path.join(temp_upload_main_dir, uploaded_file.name)
-            with open(temp_video_path, "wb") as f: f.write(uploaded_file.getbuffer())
-            videos_to_process.append(temp_video_path)
-            temp_uploaded_paths.append(temp_video_path)
-        st.info(f"{len(uploaded_files)} videó feltöltve feldolgozásra.")
-    elif input_video_path_ui and input_video_path_ui.strip():
-        path_to_check = input_video_path_ui
+            temp_media_path = os.path.join(temp_upload_main_dir, uploaded_file.name) # Változás
+            with open(temp_media_path, "wb") as f: f.write(uploaded_file.getbuffer())
+            media_to_process.append(temp_media_path) # Változás
+            temp_uploaded_paths.append(temp_media_path)
+        st.info(f"{len(uploaded_files)} fájl feltöltve feldolgozásra.")
+    elif input_path_ui and input_path_ui.strip(): # Változás
+        path_to_check = input_path_ui # Változás
         if not os.path.isabs(path_to_check): path_to_check = os.path.abspath(path_to_check)
         if os.path.isdir(path_to_check):
-            st.info(f"Videók keresése a '{path_to_check}' mappában...")
+            st.info(f"Médiafájlok keresése a '{path_to_check}' mappában...") # Változás
             for filename in os.listdir(path_to_check):
-                if filename.lower().endswith(('.mp4', '.mkv', '.mov', '.avi', '.webm')):
-                    videos_to_process.append(os.path.join(path_to_check, filename))
-            if not videos_to_process:
-                st.warning(f"Nem találhatóak videófájlok a '{path_to_check}' mappában.")
+                if filename.lower().endswith(('.mp4', '.mkv', '.mov', 'avi', '.webm', '.mp3', '.wav', '.flac', 'm4a')): # Változás
+                    media_to_process.append(os.path.join(path_to_check, filename)) # Változás
+            if not media_to_process:
+                st.warning(f"Nem találhatóak feldolgozható médiafájlok a '{path_to_check}' mappában.") # Változás
             else:
-                st.info(f"{len(videos_to_process)} videó található a mappában.")
+                st.info(f"{len(media_to_process)} fájl található a mappában.") # Változás
         elif os.path.isfile(path_to_check):
-            videos_to_process.append(path_to_check)
+            media_to_process.append(path_to_check) # Változás
         else:
             st.error(f"A megadott elérési út nem létezik vagy nem támogatott: {path_to_check}"); st.stop()
     else:
-        st.error("Nincs videó kiválasztva vagy elérési út megadva."); st.stop()
+        st.error("Nincs médiafájl kiválasztva vagy elérési út megadva."); st.stop() # Változás
 
-    if not videos_to_process: st.error("Nincsenek feldolgozandó videók."); st.stop()
+    if not media_to_process: st.error("Nincsenek feldolgozandó fájlok."); st.stop() # Változás
 
     log_placeholder = st.empty()
     progress_bar_overall = st.progress(0, text="Teljes feldolgozás...")
-    all_videos_processed_successfully = True
+    all_media_processed_successfully = True # Változás
 
-    for video_index, current_video_path_original in enumerate(videos_to_process):
-        video_basename = os.path.basename(current_video_path_original)
-        log_placeholder.info(f"Feldolgozás alatt: {video_basename} ({video_index + 1}/{len(videos_to_process)})")
+    for media_index, current_media_path in enumerate(media_to_process): # Változás
+        media_basename = os.path.basename(current_media_path) # Változás
+        log_placeholder.info(f"Feldolgozás alatt: {media_basename} ({media_index + 1}/{len(media_to_process)})") # Változás
 
-        safe_video_name = "".join(c if c.isalnum() else "_" for c in os.path.splitext(video_basename)[0])
-        video_processing_output_dir = os.path.join(actual_output_dataset_dir, safe_video_name)
-        os.makedirs(video_processing_output_dir, exist_ok=True)
+        safe_media_name = "".join(c if c.isalnum() else "_" for c in os.path.splitext(media_basename)[0]) # Változás
+        media_processing_output_dir = os.path.join(actual_output_dataset_dir, safe_media_name) # Változás
+        os.makedirs(media_processing_output_dir, exist_ok=True)
 
-        video_config = runtime_config.copy()
-        video_config['input_video'] = current_video_path_original
-        video_config['output_base_dir'] = video_processing_output_dir
-        video_config['output_metadata_file_absolute_path'] = os.path.join(actual_output_dataset_dir,
+        media_config = runtime_config.copy() # Változás
+        media_config['input_path'] = current_media_path # Változás
+        media_config['output_base_dir'] = media_processing_output_dir # Változás
+        media_config['output_metadata_file_absolute_path'] = os.path.join(actual_output_dataset_dir,
                                                                           runtime_config['output_metadata_filename'])
-        video_config['segments_relative_path_prefix'] = safe_video_name
+        media_config['segments_relative_path_prefix'] = safe_media_name # Változás
 
-        st.info(f"Indul: {video_basename}")
-        st.caption(f"Kimenetek (nyers, tiszta, szegmensek) ide: {os.path.abspath(video_config['output_base_dir'])}")
+        st.info(f"Indul: {media_basename}") # Változás
+        st.caption(f"Kimenetek (nyers, tiszta, szegmensek) ide: {os.path.abspath(media_config['output_base_dir'])}") # Változás
 
         raw_audio_file = None;
-        clean_audio_file_for_this_video = None;
-        input_for_transcription_this_video = None
-        current_video_success = True
+        clean_audio_file_for_this_media = None; # Változás
+        input_for_transcription_this_media = None # Változás
+        current_media_success = True # Változás
 
-        with st.expander(f"[{safe_video_name}] 1. Audio kinyerése...", expanded=True):
+        with st.expander(f"[{safe_media_name}] 1. Audio előkészítése...", expanded=True): # Változás
             if not check_ffmpeg():
                 st.error("FFmpeg nem található.");
-                current_video_success = False
-            if current_video_success:
-                raw_audio_file = extract_audio_from_video(video_config)
+                current_media_success = False # Változás
+            if current_media_success: # Változás
+                raw_audio_file = process_media_file(media_config) # Változás
                 if raw_audio_file:
                     st.success(f"Nyers audio: {os.path.basename(raw_audio_file)}")
                 else:
-                    st.error("Audio kinyerés sikertelen."); current_video_success = False
+                    st.error("Audio előkészítés sikertelen."); current_media_success = False # Változás
 
-        if current_video_success and video_config['use_demucs']:
-            with st.expander(f"[{safe_video_name}] 2. Vokál izoláció (Demucs)...", expanded=True):
-                clean_audio_file_for_this_video = isolate_vocals_with_demucs(video_config, raw_audio_file)
-                if clean_audio_file_for_this_video:
-                    st.success(f"Tiszta vokál: {os.path.basename(clean_audio_file_for_this_video)}")
-                    input_for_transcription_this_video = clean_audio_file_for_this_video
+        if current_media_success and media_config['use_demucs']: # Változás
+            with st.expander(f"[{safe_media_name}] 2. Vokál izoláció (Demucs)...", expanded=True): # Változás
+                clean_audio_file_for_this_media = isolate_vocals_with_demucs(media_config, raw_audio_file) # Változás
+                if clean_audio_file_for_this_media:
+                    st.success(f"Tiszta vokál: {os.path.basename(clean_audio_file_for_this_media)}")
+                    input_for_transcription_this_media = clean_audio_file_for_this_media # Változás
                 else:
                     st.warning("Demucs hiba. Nyers audió használata.")
-                    input_for_transcription_this_video = raw_audio_file
-        elif current_video_success:
-            st.info(f"[{safe_video_name}] Demucs kihagyva.")
-            input_for_transcription_this_video = raw_audio_file
+                    input_for_transcription_this_media = raw_audio_file # Változás
+        elif current_media_success: # Változás
+            st.info(f"[{safe_media_name}] Demucs kihagyva.") # Változás
+            input_for_transcription_this_media = raw_audio_file # Változás
 
-        if current_video_success and input_for_transcription_this_video:
-            with st.expander(f"[{safe_video_name}] 3. Transzkripció és szegmentálás...", expanded=True):
-                st.write(f"WhisperX futtatása: {os.path.basename(input_for_transcription_this_video)}")
-                transcribe_and_segment(video_config)
-                st.success("Transzkripció és szegmentálás befejezve ehhez a videóhoz!")
-        elif current_video_success:
-            st.error(f"[{safe_video_name}] Nincs audio fájl a transzkripcióhoz.");
-            current_video_success = False
+        if current_media_success and input_for_transcription_this_media: # Változás
+            with st.expander(f"[{safe_media_name}] 3. Transzkripció és szegmentálás...", expanded=True): # Változás
+                st.write(f"WhisperX futtatása: {os.path.basename(input_for_transcription_this_media)}") # Változás
+                transcribe_and_segment(media_config) # Változás
+                st.success("Transzkripció és szegmentálás befejezve ehhez a fájlhoz!") # Változás
+        elif current_media_success: # Változás
+            st.error(f"[{safe_media_name}] Nincs audio fájl a transzkripcióhoz."); # Változás
+            current_media_success = False # Változás
 
-        if not current_video_success:
-            all_videos_processed_successfully = False
+        if not current_media_success: # Változás
+            all_media_processed_successfully = False # Változás
 
-        progress_bar_overall.progress((video_index + 1) / len(videos_to_process),
-                                      text=f"Videó {video_index + 1}/{len(videos_to_process)} feldolgozva.")
+        progress_bar_overall.progress((media_index + 1) / len(media_to_process), # Változás
+                                      text=f"Fájl {media_index + 1}/{len(media_to_process)} feldolgozva.") # Változás
 
     if temp_uploaded_paths:
         st.markdown("---");
@@ -372,14 +372,14 @@ if st.button("🚀 Teljes Feldolgozás Indítása", type="primary", use_containe
                 st.warning(f"Hiba az ideiglenes mappa törlésekor: {e}")
 
     st.markdown("---")
-    if videos_to_process:
-        if all_videos_processed_successfully:
+    if media_to_process:
+        if all_media_processed_successfully:
             st.balloons()
             st.header("🎉 Feldolgozás Befejezve! 🎉")
-            st.success(f"Az összes videó feldolgozása sikeresen megtörtént.")
+            st.success(f"Az összes fájl feldolgozása sikeresen megtörtént.")
         else:
             st.warning(
-                "Egy vagy több videó feldolgozása során hiba történt. Ellenőrizd a fenti üzeneteket és a terminál logjait.")
+                "Egy vagy több fájl feldolgozása során hiba történt. Ellenőrizd a fenti üzeneteket és a terminál logjait.")
         st.write(
             f"A közös metaadatok (átiratok) a `{os.path.abspath(os.path.join(actual_output_dataset_dir, runtime_config['output_metadata_filename']))}` fájlban találhatók.")
         st.write(
