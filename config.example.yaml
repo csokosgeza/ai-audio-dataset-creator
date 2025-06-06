@@ -1,6 +1,6 @@
 # === Bemeneti/Kimeneti Útvonalak ===
 # A feldolgozandó videó teljes elérési útja VAGY a videókat tartalmazó mappa
-input_video: "data/" # Példa: a 'data' mappa, vagy "path/to/your/video.mp4"
+input_path: "data/" # Példa: a 'data' mappa, vagy "path/to/your/video.mp4"
 
 # A kimeneti mappa alapértelmezett elérési útja (a szkriptekhez képest relatív)
 output_base_dir: "output" # Ide kerülnek majd az adathalmazok almappái
