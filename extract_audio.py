@@ -89,7 +89,7 @@ def process_media_file(config):
     # FFmpeg parancs összeállítása
     ffmpeg_command = [
         'ffmpeg',
-        '-i', input_video_path,
+        '-i', input_media_path,
         '-vn',
         '-acodec', 'pcm_s16le',
         '-ar', str(target_sr),
