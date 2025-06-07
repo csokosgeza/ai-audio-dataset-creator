@@ -198,7 +198,7 @@ with st.sidebar:
     if st.button("Jelenlegi beállítások mentése config.yaml-ba", key="save_config_sidebar_button"):
         # ... (mentési logika változatlan)
         current_config_for_save = {
-            'input_video': input_video_path_ui,
+            'input_video': input_path_ui,
             'output_base_dir': base_output_for_datasets,
             'output_raw_audio_filename': config_defaults.get('output_raw_audio_filename'),
             'output_clean_audio_filename': config_defaults.get('output_clean_audio_filename'),
