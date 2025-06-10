@@ -273,14 +273,17 @@ if st.button("🚀 Teljes Feldolgozás Indítása", type="primary", use_containe
         path_to_check = input_path_ui # Változás
         if not os.path.isabs(path_to_check): path_to_check = os.path.abspath(path_to_check)
         if os.path.isdir(path_to_check):
-            st.info(f"Médiafájlok keresése a '{path_to_check}' mappában...") # Változás
-            for filename in os.listdir(path_to_check):
-                if filename.lower().endswith(('.mp4', '.mkv', '.mov', 'avi', '.webm', '.mp3', '.wav', '.flac', 'm4a')): # Változás
-                    media_to_process.append(os.path.join(path_to_check, filename)) # Változás
+            st.info(f"Médiafájlok rekurzív keresése a '{path_to_check}' mappában és almappáiban...")
+            supported_extensions = ('.mp4', '.mkv', '.mov', '.avi', '.webm', '.mp3', '.wav', '.flac', '.m4a')
+            for root, dirs, files in os.walk(path_to_check):
+                for filename in files:
+                    if filename.lower().endswith(supported_extensions):
+                        media_to_process.append(os.path.join(root, filename))
+            
             if not media_to_process:
-                st.warning(f"Nem találhatóak feldolgozható médiafájlok a '{path_to_check}' mappában.") # Változás
+                st.warning(f"Nem találhatóak feldolgozható médiafájlok a '{path_to_check}' mappában és almappáiban.")
             else:
-                st.info(f"{len(media_to_process)} fájl található a mappában.") # Változás
+                st.info(f"{len(media_to_process)} fájl található a mappában és almappáiban.")
         elif os.path.isfile(path_to_check):
             media_to_process.append(path_to_check) # Változás
         else:
