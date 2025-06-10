@@ -269,8 +269,22 @@ if st.button("🚀 Teljes Feldolgozás Indítása", type="primary", use_containe
             media_to_process.append(temp_media_path) # Változás
             temp_uploaded_paths.append(temp_media_path)
         st.info(f"{len(uploaded_files)} fájl feltöltve feldolgozásra.")
-    elif input_path_ui and input_path_ui.strip(): # Változás
-        path_to_check = input_path_ui # Változás
+    elif input_path_ui and input_path_ui.strip():
+        import re
+        
+        path_to_check = input_path_ui.strip()
+
+        # --- IDE ILLesszük be az új logikát ---
+        # Ellenőrizzük, hogy a rendszer Linux-e (mint a WSL) és a beírt út Windows-stílusú-e (pl. "H:\...")
+        if 'linux' in sys.platform.lower() and re.match(r'^[A-Za-z]:[\\/]', path_to_check):
+            st.info(f"Windows-elérési utat észleltünk WSL-en. Automatikus átalakítás...")
+            drive_letter = path_to_check[0].lower()
+            # Cseréljük a "H:\" részt "/mnt/h/"-ra és a többi '\'-t '/'-re
+            rest_of_path = path_to_check[2:].replace('\\', '/')
+            path_to_check = f'/mnt/{drive_letter}{rest_of_path}'
+            st.caption(f"Átalakított elérési út: {path_to_check}")
+        # --- ÚJ LOGIKA VÉGE ---
+
         if not os.path.isabs(path_to_check): path_to_check = os.path.abspath(path_to_check)
         if os.path.isdir(path_to_check):
             st.info(f"Médiafájlok rekurzív keresése a '{path_to_check}' mappában és almappáiban...")
